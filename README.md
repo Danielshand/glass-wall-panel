@@ -29,7 +29,7 @@ It works with whatever is in Home Assistant: any `light`, `scene`, `media_player
 
 ## Install
 
-A prettier version of these steps lives in [index.html](index.html).
+A prettier version of these steps: **[danielshand.github.io/glass-wall-panel](https://danielshand.github.io/glass-wall-panel/)**. Live demo with a fake house: [danielshand.github.io/glass-wall-panel/demo](https://danielshand.github.io/glass-wall-panel/demo/).
 
 **1. Get the file.** Download [`dist/glass-wall-panel.js`](dist/glass-wall-panel.js).
 
