@@ -143,7 +143,7 @@ A room id is its name in lower case with underscores (`Living Room` → `living_
 
 ## Install steps to walk the user through
 
-1. Download `dist/glass-wall-panel.js` from this repository.
+1. Download `dist/glass-wall-panel.js` from this repository (https://github.com/Danielshand/glass-wall-panel).
 2. Copy it into Home Assistant at `/config/www/glass-wall-panel.js`. If the `www` folder did not exist, create it and restart Home Assistant once.
 3. Settings → Dashboards → three-dot menu → Resources → Add resource. URL `/local/glass-wall-panel.js?v=3.0.0`, type JavaScript module.
 4. Settings → Dashboards → Add dashboard → New dashboard from scratch. Title: Wall Panel.
@@ -151,7 +151,7 @@ A room id is its name in lower case with underscores (`Living Room` → `living_
 6. On the tablet, open `http://homeassistant.local:8123/wall-panel/home` (or their own Home Assistant address) in landscape.
 7. Kiosk tips. Fire tablets: any kiosk browser app, or the Home Assistant app, with the screen set to stay on. iPad: the Home Assistant app, Auto-Lock set to Never, and Guided Access to lock it to the dashboard.
 
-HACS alternative for steps 1 to 3: HACS → three-dot menu → Custom repositories → this repository's URL, type Dashboard → install.
+HACS alternative for steps 1 to 3: HACS → three-dot menu → Custom repositories → `https://github.com/Danielshand/glass-wall-panel`, type Dashboard → install.
 
 ## Troubleshooting
 

@@ -46,7 +46,7 @@ URL: `/local/glass-wall-panel.js?v=3.0.0`, type: JavaScript module.
 
 **7. Open it on the tablet.** Go to `http://homeassistant.local:8123/wall-panel/home` in a kiosk browser or the Home Assistant app. Add `?edit=1` to the URL any time you need Home Assistant's header back.
 
-HACS users can skip steps 1 to 3: HACS → three-dot menu → Custom repositories → paste this repository's URL, type Dashboard, then install Glass Wall Panel.
+HACS users can skip steps 1 to 3: HACS → three-dot menu → Custom repositories → paste `https://github.com/Danielshand/glass-wall-panel`, type Dashboard, then install Glass Wall Panel.
 
 ## Let an AI set it up
 
