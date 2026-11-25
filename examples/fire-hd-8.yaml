@@ -1,0 +1,91 @@
+# Glass Wall Panel: Fire HD 8 (also right for 7 to 9 inch Android tablets, landscape).
+# Same layout as the 10 inch version, drawn a little denser and scaled to the smaller screen.
+# Paste this whole file into your dashboard's raw configuration editor, then swap in your own entity ids.
+# Everything except 'type' is optional. Delete any section you do not have.
+title: Wall Panel
+views:
+  - title: Home
+    path: home
+    icon: mdi:home
+    type: panel
+    cards:
+    - type: custom:glass-wall-panel
+      device: fire8
+      name: ""                 # shown in the greeting: "Good evening, Sam". Leave empty for no name.
+      accent: "#7dd3fc"        # highlight color (hex)
+      hide_header: true        # hides Home Assistant's top bar. Add ?edit=1 to the URL to get it back.
+      idle_seconds: 120        # jump back to Home after this long untouched. 0 = never.
+
+      # Big buttons at the top of the Home tab. entity: all_off turns every listed light off.
+      scenes:
+        - { name: Relax,      entity: scene.living_room_relax,  note: "Living room, warm", icon: cup }
+        - { name: Bright,     entity: scene.living_room_bright, note: "Living room, full", icon: sun }
+        - { name: Movie,      entity: scene.living_room_dimmed, note: "Living room, low",  icon: film }
+        - { name: Good night, entity: all_off,                  note: "Every light off",   icon: moon }
+
+      # One entry per room. Split lights into groups (Lamps, Overhead...) and each group
+      # becomes one dimmable bar on the Home tab. page: true gives the room its own tab.
+      rooms:
+        - name: Living Room
+          groups:
+            - name: Lamps
+              lights:
+                - { entity: light.living_room_lamp_1, name: Table lamp }
+                - { entity: light.living_room_lamp_2, name: Floor lamp }
+            - name: Overhead
+              lights:
+                - light.living_room_ceiling_1      # no name given = Home Assistant's name is used
+                - light.living_room_ceiling_2
+        - name: Bedroom
+          page: true
+          speaker: media_player.bedroom           # optional: music card on the room's page
+          groups:
+            - name: Bedside
+              lights: [light.bedside_left, light.bedside_right]
+          scenes:                                  # optional: scene buttons on the room's page
+            - { name: Bright,     entity: scene.bedroom_bright,     color: "#FFE7C2" }
+            - { name: Nightlight, entity: scene.bedroom_nightlight, color: "#FF7A45" }
+        - name: Outside
+          lights: [light.porch, light.garage]      # short form: one group called "Lights"
+
+      # Speakers. Works with any media_player. The library browser (Favorites, Playlists,
+      # Artists, Search) needs the Music Assistant integration; set library: false without it.
+      music:
+        default: media_player.living_room
+        library: true
+        speakers:
+          - { entity: media_player.living_room, name: Living Room }
+          - { entity: media_player.kitchen,     name: Kitchen }
+          - { entity: media_player.bedroom,     name: Bedroom }
+
+      # Alarm, doorbell or camera, and door / motion / leak sensors. Delete what you do not have.
+      security:
+        title: Alarm
+        alarm: alarm_control_panel.home_alarm
+        modes: [home, away]                        # any of: home, away, night
+        camera: camera.front_door
+        camera_name: Front door
+        sensors:
+          - { entity: binary_sensor.front_door,  name: Front door,  type: door }
+          - { entity: binary_sensor.back_door,   name: Back door,   type: door }
+          - { entity: binary_sensor.hall_motion, name: Hall motion, type: motion }
+          - { entity: binary_sensor.water_leak,  name: Water leak,  type: leak }
+        batteries:
+          - { entity: sensor.front_door_battery, name: Front door }
+        low_battery: 20
+
+      # Forecast tab plus a live radar centered on your Home Assistant home location.
+      weather:
+        entity: weather.forecast_home
+        location_name: Home                        # label next to the temperature
+        radar: true                                # false = no radar; or { lat: 0.0, lon: 0.0, zoom: 7 }
+
+      # Optional TV remotes. home: true puts the TV on the Home tab, room: puts it on that room's page.
+      # App ids are specific to your TV brand; the ones below are Samsung (Tizen) examples.
+      tvs:
+        - entity: media_player.living_room_tv
+          name: Living Room TV
+          home: true
+          apps:
+            - { name: Netflix, id: "3201907018807", color: "#E50914" }
+            - { name: Prime,   id: "3201910019365", color: "#00A8E1" }

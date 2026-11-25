@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Glass Wall Panel demo</title>
+<style>html,body{margin:0;background:#0f172a}</style>
+</head>
+<body>
+<!-- Live demo with a fake Home Assistant behind it. Nothing here talks to a real home.
+     URL options: ?device=fire10|fire8|ipad  &view=home|lights|music|security|weather|bedroom|den -->
+<script type="module">
+import '../dist/glass-wall-panel.js';
+
+const q = new URLSearchParams(location.search);
+const now = () => new Date().toISOString();
+const states = {};
+const put = (id, state, attributes) => { states[id] = { entity_id: id, state, attributes: attributes || {}, last_updated: now() }; };
+const light = (id, name, on, pct, rgb, modes) => put(id, on ? 'on' : 'off', { friendly_name: name, brightness: on ? Math.round(pct * 2.55) : null, rgb_color: on ? rgb : null,
+  supported_color_modes: modes || ['color_temp', 'xy'], min_color_temp_kelvin: 2200, max_color_temp_kelvin: 6500 });
+
+const warm = [255, 180, 107], gold = [255, 210, 63], pink = [255, 111, 216], teal = [61, 214, 208], white = [255, 231, 194];
+light('light.sofa_lamp', 'Sofa lamp', true, 62, warm);
+light('light.reading_lamp', 'Reading lamp', true, 40, warm);
+light('light.floor_lamp', 'Floor lamp', false);
+light('light.ceiling_1', 'Ceiling 1', true, 80, white, ['brightness']);
+light('light.ceiling_2', 'Ceiling 2', true, 80, white, ['brightness']);
+light('light.shelf_strip', 'Shelf strip', true, 55, teal);
+light('light.bedside_left', 'Bedside left', true, 25, gold);
+light('light.bedside_right', 'Bedside right', false);
+light('light.bedroom_floor', 'Floor lamp', false);
+light('light.bedroom_ceiling', 'Ceiling', false, 0, white, ['color_temp']);
+light('light.den_bar_1', 'Bar 1', true, 70, pink);
+light('light.den_bar_2', 'Bar 2', true, 70, pink);
+light('light.den_floor', 'Floor lamp', true, 45, teal);
+light('light.den_orb', 'Orb', false);
+light('light.den_main', 'Main light', false, 0, white, ['brightness']);
+light('light.porch_1', 'Porch 1', true, 100, white, ['brightness']);
+light('light.porch_2', 'Porch 2', true, 100, white, ['brightness']);
+light('light.garage', 'Garage', false, 0, white, ['brightness']);
+light('light.kids_lamp', 'Lamp', false);
+light('light.kids_nightlight', 'Night light', true, 12, gold);
+
+const player = (id, name, state, extra) => put(id, state, Object.assign({ friendly_name: name, volume_level: 0.3, group_members: [id] }, extra));
+player('media_player.living_room', 'Living Room', 'playing', { media_title: 'Blue in Green', media_artist: 'Example Quartet', volume_level: 0.34, group_members: ['media_player.living_room', 'media_player.kitchen'] });
+player('media_player.kitchen', 'Kitchen', 'playing', { media_title: 'Blue in Green', media_artist: 'Example Quartet', volume_level: 0.28, group_members: ['media_player.living_room', 'media_player.kitchen'] });
+player('media_player.bedroom', 'Bedroom', 'idle', { volume_level: 0.2 });
+player('media_player.den', 'Den', 'idle', { volume_level: 0.4 });
+player('media_player.patio', 'Patio', 'idle', { volume_level: 0.25 });
+put('media_player.living_room_tv', 'on', { friendly_name: 'Living Room TV', is_volume_muted: false });
+put('media_player.den_tv', 'off', { friendly_name: 'Den TV' });
+
+put('alarm_control_panel.home_alarm', 'armed_home', { friendly_name: 'Home alarm' });
+const cam = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#334155"/></linearGradient></defs><rect width="640" height="360" fill="url(#g)"/><rect x="0" y="250" width="640" height="110" fill="#475569"/><rect x="260" y="90" width="120" height="200" rx="6" fill="#64748b"/><circle cx="362" cy="195" r="6" fill="#cbd5e1"/><text x="20" y="34" fill="#e2e8f0" font-family="sans-serif" font-size="20">Demo camera</text></svg>');
+put('camera.front_door', 'idle', { friendly_name: 'Front door', entity_picture: cam });
+put('binary_sensor.front_door', 'off', { friendly_name: 'Front door' });
+put('binary_sensor.back_door', 'off', { friendly_name: 'Back door' });
+put('binary_sensor.patio_slider', 'on', { friendly_name: 'Patio slider' });
+put('binary_sensor.hall_motion', 'off', { friendly_name: 'Hall motion' });
+put('binary_sensor.laundry_leak', 'off', { friendly_name: 'Laundry leak' });
+put('sensor.front_door_battery', '86');
+put('sensor.back_door_battery', '14');
+put('sensor.patio_slider_battery', '71');
+put('sensor.hall_motion_battery', '93');
+put('weather.home', 'partlycloudy', { friendly_name: 'Home', temperature: 68, apparent_temperature: 66, humidity: 52, wind_speed: 7, wind_speed_unit: 'mph', temperature_unit: '°F' });
+
+const day = 86400000, conds = ['partlycloudy', 'sunny', 'rainy', 'cloudy', 'sunny', 'lightning-rainy'];
+const forecast = {
+  hourly: Array.from({ length: 10 }, (_, i) => ({ datetime: new Date(Date.now() + (i + 1) * 3600000).toISOString(), condition: conds[i % 4], temperature: 68 - i, precipitation_probability: i === 2 ? 40 : 0 })),
+  daily: conds.map((c, i) => ({ datetime: new Date(Date.now() + i * day).toISOString(), condition: c, temperature: 70 + (i * 3) % 8, templow: 52 + (i * 2) % 6 }))
+};
+const lib = (type, names) => names.map((n, i) => ({ media_type: type, name: n, uri: 'library://' + type + '/' + i, image: null, artists: [{ name: 'Example Artist' }] }));
+const library = { artist: lib('artist', ['Aurora Lane', 'Example Quartet', 'Night Drive', 'Paper Kites Co', 'The Tall Pines']), playlist: lib('playlist', ['Morning Coffee', 'Dinner Party', 'Focus', 'Sunday Slow']),
+  album: lib('album', ['Blue Hour', 'Field Notes']), track: lib('track', ['Blue in Green', 'Open Road', 'Slow Tide', 'Lanterns']) };
+
+const card = document.createElement('glass-wall-panel');
+const push = () => { card.hass = hass; };
+const hass = {
+  states, locale: { language: 'en-US' }, config: { latitude: 40.0, longitude: -100.0, location_name: 'Home', unit_system: { temperature: '°F' } },
+  connection: { subscribeMessage: (cb, msg) => { setTimeout(() => cb({ forecast: forecast[msg.forecast_type] }), 50); return Promise.resolve(() => {}); } },
+  callWS: () => Promise.resolve([{ entry_id: 'demo' }]),
+  callService: (domain, service, data) => {
+    data = data || {};
+    const ids = [].concat(data.entity_id || []);
+    if (domain === 'music_assistant' && service === 'get_library') return Promise.resolve({ response: { items: library[data.media_type] || [] } });
+    if (domain === 'music_assistant' && service === 'search') return Promise.resolve({ response: { artists: library.artist.slice(0, 2), playlists: library.playlist.slice(0, 2), albums: library.album, tracks: library.track } });
+    ids.forEach((id) => {
+      const s = states[id]; if (!s) return;
+      const a = Object.assign({}, s.attributes); let st = s.state;
+      if (domain === 'light') {
+        if (service === 'turn_off') st = 'off';
+        else { st = 'on'; if (data.brightness_pct != null) a.brightness = Math.round(data.brightness_pct * 2.55); if (!a.brightness) a.brightness = 200; if (!a.rgb_color) a.rgb_color = warm;
+          if (data.hs_color) a.rgb_color = hsToRgb(data.hs_color[0], data.hs_color[1]); if (data.color_temp_kelvin) a.rgb_color = data.color_temp_kelvin > 3500 ? [238, 243, 255] : warm; }
+      }
+      if (domain === 'media_player') {
+        if (service === 'media_play_pause') st = st === 'playing' ? 'paused' : 'playing';
+        if (service === 'volume_set') a.volume_level = data.volume_level;
+        if (service === 'turn_on') st = 'on'; if (service === 'turn_off') st = 'off';
+        if (service === 'volume_mute') a.is_volume_muted = data.is_volume_muted;
+        if (service === 'join') { const g = [id].concat(data.group_members); g.forEach((m) => { states[m] = Object.assign({}, states[m], { state: st, attributes: Object.assign({}, states[m].attributes, { group_members: g, media_title: a.media_title, media_artist: a.media_artist }), last_updated: now() }); }); return; }
+        if (service === 'unjoin') { const g = (a.group_members || []).filter((m) => m !== id); g.forEach((m) => { states[m] = Object.assign({}, states[m], { attributes: Object.assign({}, states[m].attributes, { group_members: g.length > 1 ? g : [m] }), last_updated: now() }); }); a.group_members = [id]; st = 'idle'; }
+      }
+      if (domain === 'music_assistant' && service === 'play_media') { st = 'playing'; a.media_title = 'Now playing'; a.media_artist = 'Demo'; }
+      if (domain === 'alarm_control_panel') st = { alarm_disarm: 'disarmed', alarm_arm_home: 'armed_home', alarm_arm_away: 'armed_away', alarm_arm_night: 'armed_night' }[service] || st;
+      states[id] = { entity_id: id, state: st, attributes: a, last_updated: now() };
+    });
+    setTimeout(push, 150);
+    return Promise.resolve({});
+  }
+};
+function hsToRgb(h, s) { s /= 100; const f = (n) => { const k = (n + h / 60) % 6; return Math.round(255 * (1 - s * Math.max(0, Math.min(k, 4 - k, 1)))); }; return [f(5), f(3), f(1)]; }
+
+card.setConfig({
+  type: 'custom:glass-wall-panel', device: q.get('device') || 'auto', name: 'Alex', hide_header: false, idle_seconds: 0,
+  scenes: [
+    { name: 'Relax', entity: 'scene.relax', note: 'Living room, warm', icon: 'cup' },
+    { name: 'Bright', entity: 'scene.bright', note: 'Living room, full', icon: 'sun' },
+    { name: 'Movie', entity: 'scene.movie', note: 'Living room, low', icon: 'film' },
+    { name: 'Good night', entity: 'all_off', note: 'Every light off', icon: 'moon' }
+  ],
+  rooms: [
+    { name: 'Living Room', groups: [
+      { name: 'Lamps', lights: ['light.sofa_lamp', 'light.reading_lamp', 'light.floor_lamp'] },
+      { name: 'Overhead', lights: ['light.ceiling_1', 'light.ceiling_2'] },
+      { name: 'Accent', lights: ['light.shelf_strip'] } ] },
+    { name: 'Bedroom', page: true, speaker: 'media_player.bedroom', groups: [
+      { name: 'Bedside', lights: ['light.bedside_left', 'light.bedside_right'] },
+      { name: 'Lamps', lights: ['light.bedroom_floor', 'light.bedroom_ceiling'] } ],
+      scenes: [{ name: 'Bright', entity: 'scene.bedroom_bright', color: '#FFE7C2' }, { name: 'Dimmed', entity: 'scene.bedroom_dimmed', color: '#FFB463' }, { name: 'Nightlight', entity: 'scene.bedroom_night', color: '#FF7A45' }, { name: 'Reading', entity: 'scene.bedroom_read', color: '#FFCF8A' }] },
+    { name: 'Den', page: true, speaker: 'media_player.den', groups: [
+      { name: 'Bar', lights: ['light.den_bar_1', 'light.den_bar_2'] },
+      { name: 'Lamps', lights: ['light.den_floor', 'light.den_orb'] },
+      { name: 'Overhead', lights: ['light.den_main'] } ],
+      scenes: [{ name: 'Neon', entity: 'scene.den_neon', color: '#FF6FD8' }, { name: 'Sunset', entity: 'scene.den_sunset', color: '#FF8A3D' }, { name: 'Forest', entity: 'scene.den_forest', color: '#7BE07B' }, { name: 'Dimmed', entity: 'scene.den_dimmed', color: '#FFB463' }] },
+    { name: 'Outside', groups: [{ name: 'Porch', lights: ['light.porch_1', 'light.porch_2'] }, { name: 'Garage', lights: ['light.garage'] }] },
+    { name: "Kids' Room", lights: ['light.kids_lamp', 'light.kids_nightlight'] }
+  ],
+  music: { default: 'media_player.living_room', speakers: ['media_player.living_room', 'media_player.kitchen', 'media_player.bedroom', 'media_player.den', 'media_player.patio'] },
+  security: { title: 'Alarm', alarm: 'alarm_control_panel.home_alarm', camera: 'camera.front_door', camera_name: 'Front door',
+    sensors: [{ entity: 'binary_sensor.front_door' }, { entity: 'binary_sensor.back_door' }, { entity: 'binary_sensor.patio_slider' }, { entity: 'binary_sensor.hall_motion', type: 'motion' }, { entity: 'binary_sensor.laundry_leak', type: 'leak' }],
+    batteries: [{ entity: 'sensor.front_door_battery', name: 'Front door' }, { entity: 'sensor.back_door_battery', name: 'Back door' }, { entity: 'sensor.patio_slider_battery', name: 'Patio slider' }, { entity: 'sensor.hall_motion_battery', name: 'Hall motion' }] },
+  weather: { entity: 'weather.home', location_name: 'Home' },
+  tvs: [{ entity: 'media_player.living_room_tv', home: true, apps: [{ name: 'Netflix', id: 'demo1', color: '#E50914' }, { name: 'Hulu', id: 'demo2', color: '#1CE783' }, { name: 'Prime', id: 'demo3', color: '#00A8E1' }, { name: 'Max', id: 'demo4', color: '#8B5CF6' }] },
+    { entity: 'media_player.den_tv', room: 'Den' }]
+});
+document.body.appendChild(card);
+if (q.get('view')) card._view = q.get('view');
+push();
+window.__card = card;
+</script>
+</body>
+</html>

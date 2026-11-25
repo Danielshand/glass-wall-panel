@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glass Wall Panel: setup guide</title>
+<meta name="description" content="Set up Glass Wall Panel, a full-screen Home Assistant dashboard for Fire HD 10, Fire HD 8 and iPad wall tablets, in seven steps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --white:#FFFFFF;--hairline:#DDDDDD;--charcoal-text:#1A1A1A;
+  --aubergine:#4A154B;--tint-purple:#F9F0FF;--tint-blue:#E8F5FA;
+  --accent-blue:#36C5F0;--accent-green:#2EB67D;--accent-yellow:#ECB22E;--accent-red:#E01E5A;
+  --color-bg-default:var(--white);--color-bg-alt-a:var(--tint-purple);--color-bg-alt-b:var(--tint-blue);
+  --color-text-primary:var(--charcoal-text);--color-brand-anchor:var(--aubergine);--color-border-hairline:var(--hairline);
+  --radius-image:8px;--radius-card:8px;--radius-button:4px;
+  --font-display:"Hanken Grotesk",sans-serif;
+  --motion-duration:200ms;--motion-easing:cubic-bezier(0.165,0.84,0.44,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--color-bg-default);color:var(--color-text-primary);font-family:var(--font-display);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--color-brand-anchor);text-underline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.label{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:0 0 18px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--accent-blue)}
+.dot.g{background:var(--accent-green)}.dot.y{background:var(--accent-yellow)}.dot.r{background:var(--accent-red)}
+h1{font-size:clamp(34px,4.6vw,52px);line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:0 0 20px}
+h2{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.01em;margin:0 0 14px}
+h3{font-size:19px;font-weight:700;margin:0 0 6px}
+p{margin:0 0 14px}
+.lede{font-size:19px;max-width:30em}
+img{max-width:100%;height:auto;display:block;border-radius:var(--radius-image);border:1px solid var(--color-border-hairline)}
+.btn{display:inline-block;background:var(--color-brand-anchor);color:var(--white);text-decoration:none;font-weight:600;padding:13px 22px;border-radius:var(--radius-button);transition:transform var(--motion-duration) var(--motion-easing)}
+.btn:hover{transform:translateY(-2px)}
+.quiet{margin-left:18px;font-weight:600}
+header.hero{padding:72px 0 64px}
+.split{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:center}
+.split.rev{grid-template-columns:7fr 5fr}
+section{padding:72px 0}
+.alt-a{background:var(--color-bg-alt-a)}.alt-b{background:var(--color-bg-alt-b)}
+.devices{border-top:1px solid var(--color-border-hairline);margin-top:26px}
+.device{display:grid;grid-template-columns:20px 190px 1fr auto;gap:16px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--color-border-hairline)}
+.device .dot{align-self:start;margin-top:10px}
+.device b{font-weight:700}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+code{background:var(--color-bg-alt-a);padding:2px 6px;border-radius:var(--radius-button)}
+.alt-a code{background:var(--white)}
+.steps{list-style:none;margin:36px 0 0;padding:0;counter-reset:s;max-width:760px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:64px 1fr;gap:8px;padding:26px 0;border-top:1px solid var(--color-border-hairline)}
+.steps li::before{content:counter(s,decimal-leading-zero);font-size:22px;font-weight:800;color:var(--color-brand-anchor)}
+.steps p:last-child{margin-bottom:0}
+.copy{display:flex;align-items:center;gap:10px;margin:10px 0 0;border:1px solid var(--color-border-hairline);border-radius:var(--radius-card);padding:10px 10px 10px 14px;background:var(--white)}
+.copy code{flex:1;background:none;padding:0;overflow-x:auto;white-space:nowrap}
+.copy button{flex:none;font:inherit;font-size:13px;font-weight:600;color:var(--white);background:var(--color-brand-anchor);border:0;border-radius:var(--radius-button);padding:7px 12px;cursor:pointer}
+.gest{display:grid;grid-template-columns:1fr 1fr;gap:10px 40px;margin-top:22px}
+.gest div{display:flex;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--color-border-hairline)}
+.gest b{flex:none;width:118px}
+.card{background:var(--white);border:1px solid var(--color-border-hairline);border-radius:var(--radius-card);padding:26px}
+pre{margin:0;white-space:pre-wrap;line-height:1.55}
+footer{padding:40px 0 64px;font-size:15px;border-top:1px solid var(--color-border-hairline)}
+@media (max-width:860px){.split,.split.rev{grid-template-columns:1fr;gap:32px}.device{grid-template-columns:20px 1fr}.device span:nth-child(3),.device code{grid-column:2}.gest{grid-template-columns:1fr}.steps li{grid-template-columns:48px 1fr}header.hero{padding:44px 0}section{padding:48px 0}}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap split">
+    <div>
+      <p class="label"><span class="dot"></span>Home Assistant wall dashboard</p>
+      <h1>Your house, on one sheet of glass.</h1>
+      <p class="lede">Glass Wall Panel is a full-screen dashboard for a tablet on the wall. One file. You list your lights, speakers and sensors, it draws the rest.</p>
+      <p style="margin-top:28px"><a class="btn" href="#steps">Set it up in seven steps</a><a class="quiet" href="demo/">Try the demo</a></p>
+    </div>
+    <img src="docs/screenshots/fire-hd-10.png" alt="The Home tab on a Fire HD 10: scenes, rooms with dimmable light bars, music and security" width="1280" height="800">
+  </div>
+</header>
+
+<section class="alt-b">
+  <div class="wrap split rev">
+    <div>
+      <p class="label"><span class="dot g"></span>Step zero</p>
+      <h2>Pick your tablet</h2>
+      <p>Same layout on all three, fitted to each screen. You tell the card which one with a single word.</p>
+      <div class="devices">
+        <div class="device"><span class="dot"></span><b>Fire HD 10</b><span>And most 10 to 11 inch Android tablets.</span><code>device: fire10</code></div>
+        <div class="device"><span class="dot g"></span><b>Fire HD 8</b><span>And 7 to 9 inch Android tablets. Drawn denser.</span><code>device: fire8</code></div>
+        <div class="device"><span class="dot y"></span><b>iPad</b><span>Any size. Uses the taller screen.</span><code>device: ipad</code></div>
+        <div class="device"><span class="dot r"></span><b>Not sure</b><span>The card works it out. Phones get one scrolling column.</span><code>device: auto</code></div>
+      </div>
+    </div>
+    <img src="docs/screenshots/room-page.png" alt="A room page on a Fire HD 8: grouped lights, scenes, a speaker and a TV remote" width="960" height="600">
+  </div>
+</section>
+
+<section id="steps">
+  <div class="wrap">
+    <p class="label"><span class="dot y"></span>Setup</p>
+    <h2>Seven steps, about ten minutes</h2>
+    <p class="lede">You need Home Assistant running and a way to drop a file into its config folder. The File editor add-on is enough.</p>
+    <ol class="steps">
+      <li><div><h3>Download one file</h3><p>From this repository, grab <a href="dist/glass-wall-panel.js" download><code>dist/glass-wall-panel.js</code></a>.</p></div></li>
+      <li><div><h3>Drop it into Home Assistant</h3><p>Put it in the <code>www</code> folder of your config folder. If <code>www</code> does not exist yet, create it and restart Home Assistant once.</p>
+        <div class="copy"><code>/config/www/glass-wall-panel.js</code><button type="button">Copy</button></div></div></li>
+      <li><div><h3>Register it</h3><p>Settings → Dashboards → three-dot menu → Resources → Add resource. Type: JavaScript module. URL:</p>
+        <div class="copy"><code>/local/glass-wall-panel.js?v=3.0.0</code><button type="button">Copy</button></div></div></li>
+      <li><div><h3>Make a dashboard</h3><p>Settings → Dashboards → Add dashboard → New dashboard from scratch. Call it <b>Wall Panel</b>.</p></div></li>
+      <li><div><h3>Paste the config for your tablet</h3><p>Open the new dashboard → pencil → three-dot menu → Raw configuration editor. Replace everything in there with one of these:</p>
+        <p><a href="examples/fire-hd-10.yaml">fire-hd-10.yaml</a> &nbsp;·&nbsp; <a href="examples/fire-hd-8.yaml">fire-hd-8.yaml</a> &nbsp;·&nbsp; <a href="examples/ipad.yaml">ipad.yaml</a></p></div></li>
+      <li><div><h3>Swap in your own things</h3><p>Every <code>light.…</code> and <code>media_player.…</code> in the example is a stand-in. Replace each with yours from Developer tools → States. Delete any section you do not own and its tab disappears. Save.</p></div></li>
+      <li><div><h3>Open it on the wall</h3><p>In landscape, in a kiosk browser or the Home Assistant app. Need Home Assistant's header back? Add <code>?edit=1</code> to the end.</p>
+        <div class="copy"><code>http://homeassistant.local:8123/wall-panel/home</code><button type="button">Copy</button></div></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="alt-a">
+  <div class="wrap split">
+    <div>
+      <p class="label"><span class="dot r"></span>Skip the typing</p>
+      <h2>Or hand it to an AI</h2>
+      <p>The repository includes <a href="LLM_SETUP.md"><code>LLM_SETUP.md</code></a>, written for Claude, ChatGPT or any other assistant. It covers the questions to ask, the full config format and the fixes for the usual snags.</p>
+      <p>Give it the file and say something like this.</p>
+    </div>
+    <div class="card">
+      <pre id="prompt">Read LLM_SETUP.md from the Glass Wall Panel repository and set it up for me. My tablet is a Fire HD 8. Ask me for whatever you need, one step at a time.</pre>
+      <p style="margin:18px 0 0"><button class="btn" type="button" id="copyprompt" style="border:0;cursor:pointer;font:inherit;font-weight:600">Copy the prompt</button></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split rev">
+    <div>
+      <p class="label"><span class="dot"></span>Using it</p>
+      <h2>Four gestures run every light</h2>
+      <div class="gest">
+        <div><b>Tap</b><span>On or off.</span></div>
+        <div><b>Press and slide</b><span>Dim. The bar follows your finger.</span></div>
+        <div><b>Hold a light</b><span>Color and white temperature.</span></div>
+        <div><b>Tap a room name</b><span>Open that room.</span></div>
+      </div>
+      <p style="margin-top:22px">Music tab: tap a speaker to aim at it, tap Join to add it to whatever is playing. Leave it alone for two minutes and the panel returns to Home.</p>
+    </div>
+    <img src="docs/screenshots/music.png" alt="The Music tab: library tiles on the left, speakers with Join and Leave on the right" width="1280" height="800">
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">MIT licensed. Works with any Home Assistant light, scene, speaker, alarm, camera, sensor and weather entity. Not affiliated with Home Assistant, Amazon or Apple.</div>
+</footer>
+
+<script>
+function flash(b, t) { var o = b.textContent; b.textContent = t; setTimeout(function () { b.textContent = o; }, 1400); }
+function copy(text, b) { if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { flash(b, 'Copied'); }, function () { flash(b, 'Select and copy'); }); else flash(b, 'Select and copy'); }
+document.querySelectorAll('.copy button').forEach(function (b) { b.addEventListener('click', function () { copy(b.previousElementSibling.textContent, b); }); });
+document.getElementById('copyprompt').addEventListener('click', function () { copy(document.getElementById('prompt').textContent, this); });
+</script>
+</body>
+</html>
